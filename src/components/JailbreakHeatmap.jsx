@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, Typography, Tabs, Tab, Box, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Card, CardContent, CardHeader, Typography, Tabs, Tab, Box, Table, TableBody, TableCell, TableHead, TableRow, Link } from '@mui/material';
 import Papa from 'papaparse';
 
 const JailbreakHeatmap = () => {
@@ -288,6 +288,24 @@ const JailbreakHeatmap = () => {
         title={
           <Typography variant="h5" component="div" align="center">
             Analysis of Jailbreak ASR Performance Under Quantization, Language Transition (EN/KR), and Temporal Variations (Past, Present, Future) 🛠️📚
+          </Typography>
+        }
+        subheader={
+          <Typography variant="body2" component="div" align="center" sx={{ mt: 1, color: 'text.secondary' }}>
+            Companion data for Jaesik Lee, “Quantization-Based Jailbreaking Vulnerability Analysis:
+            A Study on Performance and Safety of the Llama3-8B-Instruct Model,”{' '}
+            <em>IEEE Access</em>, vol. 13, pp. 136524–136535, 2025.
+            <Box component="span" sx={{ display: 'block', mt: 0.5 }}>
+              <Link href="https://doi.org/10.1109/ACCESS.2025.3594287" target="_blank" rel="noopener noreferrer">
+                DOI: 10.1109/ACCESS.2025.3594287
+              </Link>
+              {' · '}
+              <Link href="https://github.com/j30231/j30231.github.io" target="_blank" rel="noopener noreferrer">
+                Data &amp; source on GitHub
+              </Link>
+              {' · '}
+              Open Access (CC BY 4.0)
+            </Box>
           </Typography>
         }
       />

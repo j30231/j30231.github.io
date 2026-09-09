@@ -1,6 +1,6 @@
 {
-  "short_name": "Jailbreak Heatmap",
-  "name": "Jailbreak Heatmap Application",
+  "short_name": "Quant Jailbreak ASR",
+  "name": "Quantization-Based Jailbreaking Vulnerability Analysis — Interactive Data",
   "icons": [
     {
       "src": "favicon.ico",
