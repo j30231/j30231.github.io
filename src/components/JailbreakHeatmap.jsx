@@ -304,7 +304,9 @@ const JailbreakHeatmap = () => {
                 Data &amp; source on GitHub
               </Link>
               {' · '}
-              Open Access (CC BY 4.0)
+              <Link href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">
+                Data: CC BY 4.0
+              </Link>
             </Box>
           </Typography>
         }

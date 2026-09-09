@@ -5,7 +5,8 @@ Interactive companion data for the IEEE Access paper
 
 [![Paper](https://img.shields.io/badge/IEEE%20Access-10.1109%2FACCESS.2025.3594287-00629B)](https://doi.org/10.1109/ACCESS.2025.3594287)
 [![Live demo](https://img.shields.io/badge/demo-j30231.github.io-2ea44f)](https://j30231.github.io)
-[![License: CC BY 4.0](https://img.shields.io/badge/license-CC%20BY%204.0-lightgrey)](https://creativecommons.org/licenses/by/4.0/)
+[![Data: CC BY 4.0](https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey)](https://creativecommons.org/licenses/by/4.0/)
+[![Code: MIT](https://img.shields.io/badge/code-MIT-lightgrey)](https://opensource.org/licenses/MIT)
 
 **→ Explore the data: [j30231.github.io](https://j30231.github.io)**
 
@@ -157,4 +158,13 @@ Requires Node 20.19+ or 22.12+ (the deploy workflow uses Node 24). Built with Vi
 
 ## License
 
-The paper is published open access under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The data in this repository accompanies it under the same terms — please cite the paper if you use it.
+This repository holds two different kinds of work, so it carries two licenses.
+
+| What | License | What that means |
+| --- | --- | --- |
+| **Data & documentation** — `public/data/`, `README.md`, `docs/` | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — [`LICENSE`](LICENSE) | Use it anywhere, including commercially, and build on it. Just credit the source by citing the paper. |
+| **Viewer source code** — `src/`, build and workflow config | [MIT](https://opensource.org/licenses/MIT) — [`LICENSE-CODE`](LICENSE-CODE) | Do what you like with the code; keep the copyright notice. |
+
+CC BY 4.0 matches the paper, which is published open access under the same terms. Creative Commons [recommends against using CC licenses for software](https://creativecommons.org/faq/#can-i-apply-a-creative-commons-license-to-software), hence MIT for the viewer.
+
+If you use the data, please cite the paper — that is the attribution CC BY asks for.
