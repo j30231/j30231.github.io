@@ -2,6 +2,37 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, Typography, Tabs, Tab, Box, Table, TableBody, TableCell, TableHead, TableRow, Link } from '@mui/material';
 import Papa from 'papaparse';
 
+// Hue in the ratio heatmaps encodes column position, not value — these are its keys.
+const COLUMN_BLOCKS = [
+  ['#ff0000', 'Q1–Q10'], ['#ff8c00', 'Q11–Q20'], ['#ffd700', 'Q21–Q30'],
+  ['#32cd32', 'Q31–Q40'], ['#00ff7f', 'Q41–Q50'], ['#00ffff', 'Q51–Q60'],
+  ['#0000ff', 'Q61–Q70'], ['#8a2be2', 'Q71–Q80'], ['#ff00ff', 'Q81–Q90'],
+  ['#ff1493', 'Q91–Q100'],
+];
+
+const Swatch = ({ color, outlined }) => (
+  <Box
+    component="span"
+    sx={{
+      display: 'inline-block', width: '0.75rem', height: '0.75rem',
+      bgcolor: color, verticalAlign: 'middle', mr: 0.5, ml: 1,
+      border: outlined ? '1px solid #cbd5e1' : 'none',
+    }}
+  />
+);
+
+const Legend = ({ children }) => (
+  <Typography variant="caption" component="div" align="center" sx={{ lineHeight: 2 }}>
+    {children}
+  </Typography>
+);
+
+const LegendNote = ({ children }) => (
+  <Typography variant="caption" component="p" align="center" sx={{ mt: 1, color: 'text.secondary' }}>
+    {children}
+  </Typography>
+);
+
 // What each tab shows, in the tab order below.
 const TAB_INFO = [
   {
@@ -26,7 +57,7 @@ const TAB_INFO = [
   },
   {
     rows: '144 rows',
-    blurb: 'The full grid. Colour encodes which retry first succeeded (0–19) — darker means the model gave in sooner. Blank means it never did.',
+    blurb: 'The full grid. Colour encodes which of the 20 attempts first succeeded — darker means the model gave in sooner. Blank means it never did.',
     file: 'tf_ratios/combined_quantization_tense_tf_ratio.csv',
   },
   {
@@ -183,6 +214,20 @@ const JailbreakHeatmap = () => {
     }
   };
 
+  // Tab 4 stores a retry index (0-19, -1 = never), every other ratio tab a percentage.
+  const cellTooltip = (index, value, displayValue, type) => {
+    const q = `Q${index + 1}`;
+    if (type === 'success') {
+      return `${q} — ${value === 'T' ? 'jailbroken at least once' : 'refused all 20 attempts'}`;
+    }
+    if (selectedTab === 4) {
+      return displayValue === -1
+        ? `${q} — never jailbroken`
+        : `${q} — jailbroken on attempt ${displayValue + 1} of 20`;
+    }
+    return `${q} — jailbroken in ${displayValue}% of runs`;
+  };
+
   const renderHeatmap = (data, type = 'ratio') => {
     const qKeys = Array.from({ length: 100 }, (_, i) => `q${i + 1}`);
 
@@ -202,7 +247,7 @@ const JailbreakHeatmap = () => {
                 paddingRight: '1rem', 
                 fontSize: '0.7rem', 
                 whiteSpace: 'nowrap' 
-              }}>Category</th>
+              }}>Condition</th>
               {/* q1 ~ q100 라벨 추가 */}
               {qKeys.map((key, i) => (
                 <th key={i} style={{ width: '0.5rem', padding: '0.25rem', fontSize: '0.5rem', transform: 'rotate(-45deg)', whiteSpace: 'nowrap', verticalAlign: 'bottom' }}>
@@ -249,7 +294,7 @@ const JailbreakHeatmap = () => {
                           border: '1px solid #e2e8f0',
                           transition: 'background-color 0.2s',
                         }}
-                        title={type === 'success' ? `q${index + 1}: ${value === 'T' ? 'Success' : 'Failure'}` : `q${index + 1}: ${displayValue}%`}
+                        title={cellTooltip(index, value, displayValue, type)}
                       />
                     </td>
                   );
@@ -258,58 +303,50 @@ const JailbreakHeatmap = () => {
             ))}
           </tbody>
         </table>
-        {/* 범례 수정 */}
-        <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <Typography variant="body2" fontWeight="500">
-              {type === 'success' ? 'Success Rate:' : selectedTab === 4 ? 'Color by 0-19 range:' : 'Color by range:'}
-            </Typography>
-            {type !== 'success' ? (
-              selectedTab === 4 ? (
-                <>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#FFFFFF', border: '1px solid #e2e8f0' }}></div>
-                  <Typography variant="caption">-1: White</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#0D47A1' }}></div>
-                  <Typography variant="caption">0: Darkest</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#E3F2FD' }}></div>
-                  <Typography variant="caption">19: Lightest</Typography>
-                </>
-              ) : (
-                <>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}></div>
-                  <Typography variant="caption">Failure (0%)</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#ff0000' }}></div>
-                  <Typography variant="caption">Q1-Q10</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#ff8c00' }}></div>
-                  <Typography variant="caption">Q11-Q20</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#ffd700' }}></div>
-                  <Typography variant="caption">Q21-Q30</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#32cd32' }}></div>
-                  <Typography variant="caption">Q31-Q40</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#00ff7f' }}></div>
-                  <Typography variant="caption">Q41-Q50</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#00ffff' }}></div>
-                  <Typography variant="caption">Q51-Q60</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#0000ff' }}></div>
-                  <Typography variant="caption">Q61-Q70</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#8a2be2' }}></div>
-                  <Typography variant="caption">Q71-Q80</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#ff00ff' }}></div>
-                  <Typography variant="caption">Q81-Q90</Typography>
-                  <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#ff1493' }}></div>
-                  <Typography variant="caption">Q91-Q100</Typography>
-                </>
-              )
+        <Box sx={{ mt: 2.5, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ maxWidth: 760 }}>
+            {type === 'success' ? (
+              <>
+                <Legend>
+                  <Swatch color="#ffffff" outlined /> refused all 20 attempts
+                  <Swatch color="#4caf50" /> jailbroken at least once
+                </Legend>
+                <LegendNote>
+                  Each cell is one scenario under one condition — the raw outcome every other tab aggregates.
+                </LegendNote>
+              </>
+            ) : selectedTab === 4 ? (
+              <>
+                <Legend>
+                  <Swatch color="#ffffff" outlined /> never jailbroken
+                  <Swatch color="#0D47A1" /> gave in on attempt 1
+                  <Swatch color="#7986CB" /> …
+                  <Swatch color="#E3F2FD" /> held out to attempt 20
+                </Legend>
+                <LegendNote>
+                  Colour depth is <em>how soon</em> the model gave in, not how often. Darker means it broke
+                  on an earlier attempt.
+                </LegendNote>
+              </>
             ) : (
               <>
-                <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#ffffff', border: '1px solid #e2e8f0' }}></div>
-                <Typography variant="caption">Jailbreak Failed (F)</Typography>
-                <div style={{ width: '0.75rem', height: '0.75rem', backgroundColor: '#4caf50' }}></div>
-                <Typography variant="caption">Jailbreak Success (T)</Typography>
+                <Legend>
+                  <Swatch color="#ffffff" outlined /> never jailbroken (0%)
+                  {COLUMN_BLOCKS.map(([color, label]) => (
+                    <React.Fragment key={label}>
+                      <Swatch color={color} /> {label}
+                    </React.Fragment>
+                  ))}
+                </Legend>
+                <LegendNote>
+                  Hue only marks which block of columns a cell sits in — it carries no value. The{' '}
+                  <strong>strength of the colour is the jailbreak rate</strong>: faint is close to 0%,
+                  fully saturated is 100%.
+                </LegendNote>
               </>
             )}
-          </div>
-        </div>
+          </Box>
+        </Box>
       </div>
     );
   };
@@ -372,8 +409,17 @@ const JailbreakHeatmap = () => {
           {selectedTab === 5 && renderHeatmap(success_rates, 'success')}
         </Box>
         {/* CSV 전체 데이터 표시 */}
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6" align="center">Full CSV Data</Typography>
+        <Box sx={{ mt: 5 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            The numbers behind this view
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
+            Every row of{' '}
+            <Link href={`/data/${TAB_INFO[selectedTab].file}`} target="_blank" rel="noopener noreferrer">
+              <code>{TAB_INFO[selectedTab].file}</code>
+            </Link>
+            , exactly as published — scroll sideways for all 100 scenarios.
+          </Typography>
           <div style={{ overflowX: 'auto' }}>
             <Table size="small">
               <TableHead>
