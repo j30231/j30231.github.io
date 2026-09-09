@@ -2,6 +2,40 @@ import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, Typography, Tabs, Tab, Box, Table, TableBody, TableCell, TableHead, TableRow, Link } from '@mui/material';
 import Papa from 'papaparse';
 
+// What each tab shows, in the tab order below.
+const TAB_INFO = [
+  {
+    rows: '1 row',
+    blurb: 'Everything pooled. Each cell is how often that scenario jailbroke across all 24 model variants, both languages and all three tenses.',
+    file: 'tf_ratios/overall_tf_ratio.csv',
+  },
+  {
+    rows: '6 rows',
+    blurb: 'The two languages crossed with the three tenses. This is where the English/Korean and past/present gaps become visible at a glance.',
+    file: 'tf_ratios/combined_tense_tf_ratio.csv',
+  },
+  {
+    rows: '24 rows',
+    blurb: 'One row per quantization level, averaged over languages and tenses. Rows are ordered from the bf16 baseline down to 1-bit.',
+    file: 'tf_ratios/quantization_average_ratio.csv',
+  },
+  {
+    rows: '48 rows',
+    blurb: 'Quantization crossed with language. Each cell is the share of the three tenses that jailbroke, so values land on 0 / 33 / 67 / 100.',
+    file: 'tf_ratios/combined_quantization_tf_ratio.csv',
+  },
+  {
+    rows: '144 rows',
+    blurb: 'The full grid. Colour encodes which retry first succeeded (0–19) — darker means the model gave in sooner. Blank means it never did.',
+    file: 'tf_ratios/combined_quantization_tense_tf_ratio.csv',
+  },
+  {
+    rows: '144 rows',
+    blurb: 'The raw outcome behind everything above: green if that scenario was jailbroken at least once in 20 attempts.',
+    file: 'jailbreak_success_rates.csv',
+  },
+];
+
 const JailbreakHeatmap = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [dataSets, setDataSets] = useState({
@@ -283,31 +317,13 @@ const JailbreakHeatmap = () => {
   const { tf_ratio1, tf_ratio2, quant_asr, tf_ratio3, tf_ratio4, success_rates } = dataSets;
 
   return (
-    <Card sx={{ width: '100%' }}>
+    <Card sx={{ width: '100%' }} id="explore">
       <CardHeader
-        title={
-          <Typography variant="h5" component="div" align="center">
-            Analysis of Jailbreak ASR Performance Under Quantization, Language Transition (EN/KR), and Temporal Variations (Past, Present, Future) 🛠️📚
-          </Typography>
-        }
+        title={<Typography variant="h6" component="h2">Explore the data</Typography>}
         subheader={
-          <Typography variant="body2" component="div" align="center" sx={{ mt: 1, color: 'text.secondary' }}>
-            Companion data for Jaesik Lee, “Quantization-Based Jailbreaking Vulnerability Analysis:
-            A Study on Performance and Safety of the Llama3-8B-Instruct Model,”{' '}
-            <em>IEEE Access</em>, vol. 13, pp. 136524–136535, 2025.
-            <Box component="span" sx={{ display: 'block', mt: 0.5 }}>
-              <Link href="https://doi.org/10.1109/ACCESS.2025.3594287" target="_blank" rel="noopener noreferrer">
-                DOI: 10.1109/ACCESS.2025.3594287
-              </Link>
-              {' · '}
-              <Link href="https://github.com/j30231/j30231.github.io" target="_blank" rel="noopener noreferrer">
-                Data &amp; source on GitHub
-              </Link>
-              {' · '}
-              <Link href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">
-                Data: CC BY 4.0
-              </Link>
-            </Box>
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Six views of the same experiment grid, from fully pooled down to one cell per scenario.
+            Every column <code>Q1</code>–<code>Q100</code> is a JBB-Behaviors scenario.
           </Typography>
         }
       />
@@ -328,6 +344,25 @@ const JailbreakHeatmap = () => {
           <Tab label="Quant-Tense" />
           <Tab label="T/F Maps" />
         </Tabs>
+        <Box
+          sx={{
+            mt: 2, px: 2, py: 1.5,
+            bgcolor: 'grey.50',
+            borderLeft: '3px solid', borderColor: 'primary.main',
+            borderRadius: 1,
+          }}
+        >
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            <strong>{TAB_INFO[selectedTab].rows}</strong> — {TAB_INFO[selectedTab].blurb}
+            {' '}
+            <Box component="span" sx={{ display: 'block', mt: 0.5, fontSize: '0.8rem' }}>
+              Source:{' '}
+              <Link href={`/data/${TAB_INFO[selectedTab].file}`} target="_blank" rel="noopener noreferrer">
+                <code>{TAB_INFO[selectedTab].file}</code>
+              </Link>
+            </Box>
+          </Typography>
+        </Box>
         <Box sx={{ mt: 2 }}>
           {selectedTab === 0 && renderHeatmap(tf_ratio1, 'ratio')}
           {selectedTab === 1 && renderHeatmap(tf_ratio2, 'ratio')}
